@@ -4,56 +4,308 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jeds Game</title>
+    <link rel="icon" type="image/png" href="./planet_ringed.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background-color: #1e1e2e;
+        :root {
+            --neon: #00e5ff;
+            --magenta: #ff3cac;
+            --violet: #7b2ff7;
+            --panel: #0d0d24;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            background: #03030a;
             color: #ffffff;
+            font-family: 'Orbitron', 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+
+        body {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            margin: 0;
+            padding: 48px 20px;
+            position: relative;
+        }
+
+        /* Space background: nebula glow + two drifting star layers */
+        .nebula {
+            position: fixed;
+            inset: 0;
+            z-index: -3;
+            background:
+                radial-gradient(ellipse at 20% 10%, rgba(123, 47, 247, 0.35), transparent 50%),
+                radial-gradient(ellipse at 80% 90%, rgba(255, 60, 172, 0.22), transparent 55%),
+                #03030a;
+        }
+
+        .stars, .stars.far {
+            position: fixed;
+            inset: 0;
+            z-index: -2;
+            pointer-events: none;
+            background-repeat: repeat;
+        }
+
+        .stars {
+            background-image:
+                radial-gradient(1px 1px at 20px 30px, #ffffff, transparent),
+                radial-gradient(1px 1px at 120px 80px, #cfe9ff, transparent),
+                radial-gradient(2px 2px at 200px 150px, #ffffff, transparent),
+                radial-gradient(1px 1px at 300px 220px, #ffd6f5, transparent);
+            background-size: 340px 260px;
+            animation: drift 120s linear infinite;
+        }
+
+        .stars.far {
+            background-image:
+                radial-gradient(1px 1px at 60px 40px, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(1px 1px at 260px 180px, rgba(160, 220, 255, 0.7), transparent);
+            background-size: 220px 200px;
+            animation: drift 220s linear infinite reverse;
+        }
+
+        @keyframes drift {
+            from { background-position: 0 0; }
+            to { background-position: 0 -2600px; }
         }
 
         h1 {
-            font-size: 48px;
-            margin-bottom: 40px;
+            margin: 0 0 8px;
+            font-size: clamp(34px, 7vw, 60px);
+            font-weight: 900;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--neon), var(--magenta));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            filter: drop-shadow(0 0 18px rgba(0, 229, 255, 0.35));
+        }
+
+        .subtitle {
+            margin: 0 0 48px;
+            font-size: 12px;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: #8ea2c7;
         }
 
         .button-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 28px;
+            width: min(1000px, 100%);
+        }
+
+        /* Photo card */
+        .game-button {
+            position: relative;
             display: flex;
             flex-direction: column;
-            gap: 20px;
-            width: 300px;
-        }
-
-        .game-button {
-            display: block;
-            padding: 16px 24px;
-            font-size: 20px;
+            overflow: hidden;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            background: linear-gradient(160deg, #161638, var(--panel));
             color: #ffffff;
-            background-color: #4a6cf7;
-            text-align: center;
             text-decoration: none;
-            border-radius: 10px;
-            transition: background-color 0.2s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
-        .game-button:hover {
-            background-color: #3852c4;
+        /* Light sweep across the card on hover */
+        .game-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -75%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.7s ease;
+            pointer-events: none;
+        }
+
+        .game-button:hover,
+        .game-button:focus-visible {
+            transform: translateY(-8px) scale(1.02);
+            border-color: var(--neon);
+            box-shadow: 0 0 25px rgba(0, 229, 255, 0.45), 0 0 60px rgba(255, 60, 172, 0.25);
+            outline: none;
+        }
+
+        .game-button:hover::after { left: 125%; }
+
+        .card-art {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 180px;
+            overflow: hidden;
+            background: radial-gradient(circle at 50% 30%, #2d1b66, #0a0a1c 75%);
+        }
+
+        .card-art img {
+            width: 110px;
+            height: 110px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 0 12px var(--neon));
+            transition: transform 0.4s ease;
+        }
+
+        .card-art .emoji {
+            font-size: 80px;
+            line-height: 1;
+            filter: drop-shadow(0 0 14px var(--magenta));
+            transition: transform 0.4s ease;
+        }
+
+        .game-button:hover .card-art img,
+        .game-button:hover .card-art .emoji {
+            transform: scale(1.12) rotate(-4deg);
+        }
+
+        .card-number {
+            position: absolute;
+            top: 12px;
+            left: 14px;
+            font-size: 12px;
+            letter-spacing: 2px;
+            color: var(--neon);
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            padding: 18px 20px 22px;
+        }
+
+        .card-tag {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--magenta);
+        }
+
+        .card-title {
+            margin: 6px 0 10px;
+            font-size: 22px;
+            font-weight: 900;
+        }
+
+        .card-desc {
+            flex: 1;
+            margin: 0 0 16px;
+            font-size: 13px;
+            line-height: 1.5;
+            color: #9fb0d4;
+        }
+
+        .play-label {
+            align-self: flex-start;
+            padding: 10px 16px;
+            border-radius: 8px;
+            background: linear-gradient(90deg, var(--violet), var(--neon));
+            color: #06061a;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stars, .stars.far { animation: none; }
+            .game-button, .game-button::after, .card-art img, .card-art .emoji { transition: none; }
         }
     </style>
 </head>
 <body>
+    <div class="nebula"></div>
+    <div class="stars"></div>
+    <div class="stars far"></div>
+
     <h1>Jeds Game</h1>
+    <p class="subtitle">Choose your mission</p>
+
+
 
     <div class="button-container">
-        <a class="game-button" href="https://thekajopelayeolas-tech.github.io/fighting-game/">Fighting Game</a>
-        <a class="game-button" href="https://thekajopelayeolas-tech.github.io/tetriz/">Tetris</a>
-        <a class="game-button" href="https://thekajopelayeolas-tech.github.io/pirate2/">Pirate 2</a>
-        <a class="game-button" href="file:///Users/Jedidiah/space/ultimate_space_game/index.html">Ultimate Space Game</a>
+        <a class="game-button" href="https://thekajopelayeolas-tech.github.io/fighting-game/">
+            <div class="card-art">
+                <span class="card-number">01</span>
+                <img src="https://thekajopelayeolas-tech.github.io/fighting-game/assets/favicon.png" alt="Fighting Game artwork">
+            </div>
+            <div class="card-body">
+                <span class="card-tag">Arena Combat</span>
+                <h2 class="card-title">Fighting Game</h2>
+                <p class="card-desc">Survive wave after wave in a head-to-head arena brawl.</p>
+                <span class="play-label">PLAY</span>
+            </div>
+        </a>
+
+        <a class="game-button" href="https://thekajopelayeolas-tech.github.io/tetriz/">
+            <div class="card-art">
+                <span class="card-number">02</span>
+                <span class="emoji" aria-hidden="true">🧩</span>
+            </div>
+            <div class="card-body">
+                <span class="card-tag">Block Puzzle</span>
+                <h2 class="card-title">Tetris</h2>
+                <p class="card-desc">Stack, rotate, and clear lines before the board fills up.</p>
+                <span class="play-label">PLAY</span>
+            </div>
+        </a>
+
+        <a class="game-button" href="https://thekajopelayeolas-tech.github.io/pirate2/">
+            <div class="card-art">
+                <span class="card-number">03</span>
+                <img src="https://thekajopelayeolas-tech.github.io/pirate2/favicon-32.png" alt="Pirate 2 artwork">
+            </div>
+            <div class="card-body">
+                <span class="card-tag">Treasure Hunt</span>
+                <h2 class="card-title">Pirate 2</h2>
+                <p class="card-desc">Sail the seas and grab every treasure you can reach.</p>
+                <span class="play-label">PLAY</span>
+            </div>
+        </a>
+
+        <a class="game-button" href="https://thekajopelayeolas-tech.github.io/games/ultimate_space_game/index.html">
+            <div class="card-art">
+                <span class="card-number">04</span>
+                <img src="https://thekajopelayeolas-tech.github.io/games/ultimate_space_game/assets/space_intruder/sprites/space_cruiser_7_flipped.png" alt="Cruiser ship artwork">
+            </div>
+            <div class="card-body">
+                <span class="card-tag">Space Shooter</span>
+                <h2 class="card-title">Ultimate Space Game</h2>
+                <p class="card-desc">Blast through enemy cruisers, grab power-ups, and visit the shops.</p>
+                <span class="play-label">PLAY</span>
+            </div>
+        </a>
+
+        <a class="game-button" href="file:///Users/Jedidiah/space/index.html">
+            <div class="card-art">
+                <span class="card-number">05</span>
+                <span class="emoji" aria-hidden="true">🚀</span>
+            </div>
+            <div class="card-body">
+                <span class="card-tag">Local Build</span>
+                <h2 class="card-title">Space</h2>
+                <p class="card-desc">Launch the space game stored on this Mac.</p>
+                <span class="play-label">PLAY</span>
+            </div>
+        </a>
     </div>
 </body>
 </html>
